@@ -1,0 +1,16 @@
+package com.fooddelivery.repository;
+
+import com.fooddelivery.model.CustomerAddress;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface CustomerAddressRepository extends JpaRepository<CustomerAddress, Long> {
+    List<CustomerAddress> findByCustomerId(Long customerId);
+    Optional<CustomerAddress> findByIdAndCustomerId(Long id, Long customerId);
+    Optional<CustomerAddress> findByCustomerIdAndIsDefaultTrue(Long customerId);
+}
+
