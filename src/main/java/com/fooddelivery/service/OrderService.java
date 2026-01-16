@@ -53,6 +53,9 @@ public class OrderService {
     @Autowired
     private DeliveryPartnerRepository deliveryPartnerRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     @Transactional
     public OrderResponse placeOrder(Long userId, PlaceOrderRequest request) {
         Customer customer = customerRepository.findByUserId(userId)
@@ -100,6 +103,16 @@ public class OrderService {
 
         // Clear cart
         cartItemRepository.deleteByCartId(cart.getId());
+
+        // Send order confirmation email
+        String deliveryAddress = address.getStreet() + ", " + address.getCity() + " - " + address.getPincode();
+        emailService.sendOrderConfirmation(
+            customer.getUser().getEmail(),
+            customer.getName(),
+            order.getId(),
+            totalAmount,
+            deliveryAddress
+        );
 
         return convertToOrderResponse(order);
     }
@@ -170,6 +183,15 @@ public class OrderService {
         order.setStatus(Order.OrderStatus.CANCELLED);
         order = orderRepository.save(order);
 
+        // Send order status update email
+        emailService.sendOrderStatusUpdate(
+            order.getCustomer().getUser().getEmail(),
+            order.getCustomer().getName(),
+            order.getId(),
+            "CANCELLED",
+            "Your order has been cancelled successfully."
+        );
+
         return convertToOrderResponse(order);
     }
 
@@ -192,6 +214,15 @@ public class OrderService {
         order.setStatus(Order.OrderStatus.CONFIRMED);
         order = orderRepository.save(order);
 
+        // Send order status update email
+        emailService.sendOrderStatusUpdate(
+            order.getCustomer().getUser().getEmail(),
+            order.getCustomer().getName(),
+            order.getId(),
+            "CONFIRMED",
+            "Your order has been confirmed and is being prepared."
+        );
+
         return convertToOrderResponse(order);
     }
 
@@ -213,6 +244,15 @@ public class OrderService {
 
         order.setStatus(Order.OrderStatus.PREPARING);
         order = orderRepository.save(order);
+
+        // Send order status update email
+        emailService.sendOrderStatusUpdate(
+            order.getCustomer().getUser().getEmail(),
+            order.getCustomer().getName(),
+            order.getId(),
+            "PREPARING",
+            "Your order is being prepared and will be ready soon."
+        );
 
         return convertToOrderResponse(order);
     }
@@ -237,6 +277,20 @@ public class OrderService {
         order.setStatus(Order.OrderStatus.OUT_FOR_DELIVERY);
         order = orderRepository.save(order);
 
+        // Generate delivery OTP (6-digit)
+        String otp = String.format("%06d", (int)(Math.random() * 1000000));
+        
+        // Send delivery OTP email
+        emailService.sendDeliveryOTP(
+            order.getCustomer().getUser().getEmail(),
+            order.getCustomer().getName(),
+            otp,
+            order.getId()
+        );
+
+        // Note: In a real system, you would store this OTP in the database with expiration time
+        // For now, we're just sending it via email
+
         return convertToOrderResponse(order);
     }
 
@@ -258,6 +312,15 @@ public class OrderService {
 
         order.setStatus(Order.OrderStatus.DELIVERED);
         order = orderRepository.save(order);
+
+        // Send order status update email
+        emailService.sendOrderStatusUpdate(
+            order.getCustomer().getUser().getEmail(),
+            order.getCustomer().getName(),
+            order.getId(),
+            "DELIVERED",
+            "Your order has been delivered successfully. Thank you for choosing us!"
+        );
 
         return convertToOrderResponse(order);
     }

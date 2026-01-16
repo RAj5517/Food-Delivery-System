@@ -34,6 +34,9 @@ public class PaymentService {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     @Value("${razorpay.key.id}")
     private String razorpayKeyId;
 
@@ -155,11 +158,31 @@ public class PaymentService {
             order.setPaymentStatus(Order.PaymentStatus.PAID);
             orderRepository.save(order);
 
+            // Send payment success email
+            emailService.sendPaymentSuccess(
+                order.getCustomer().getUser().getEmail(),
+                order.getCustomer().getName(),
+                order.getId(),
+                payment.getAmount(),
+                request.getRazorpayPaymentId()
+            );
+
             return convertToPaymentResponse(payment);
 
         } catch (Exception e) {
             payment.setStatus(Payment.PaymentStatus.FAILED);
             paymentRepository.save(payment);
+            
+            // Send payment failure email
+            Order order = payment.getOrder();
+            emailService.sendPaymentFailure(
+                order.getCustomer().getUser().getEmail(),
+                order.getCustomer().getName(),
+                order.getId(),
+                payment.getAmount(),
+                e.getMessage()
+            );
+            
             throw new BadRequestException("Payment verification failed: " + e.getMessage());
         }
     }

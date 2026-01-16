@@ -39,6 +39,9 @@ public class AuthService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private EmailService emailService;
+
     @Transactional
     public AuthResponse registerCustomer(RegisterCustomerRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -67,6 +70,9 @@ public class AuthService {
         response.setEmail(user.getEmail());
         response.setRole(user.getRole().name());
         response.setExpiresIn(jwtUtil.extractExpiration(token).getTime() - System.currentTimeMillis());
+
+        // Send registration confirmation email
+        emailService.sendRegistrationConfirmation(user.getEmail(), customer.getName(), "CUSTOMER");
 
         return response;
     }
@@ -106,6 +112,9 @@ public class AuthService {
         response.setRole(user.getRole().name());
         response.setExpiresIn(jwtUtil.extractExpiration(token).getTime() - System.currentTimeMillis());
 
+        // Send registration confirmation email
+        emailService.sendRegistrationConfirmation(user.getEmail(), restaurant.getName(), "RESTAURANT");
+
         return response;
     }
 
@@ -138,6 +147,9 @@ public class AuthService {
         response.setEmail(user.getEmail());
         response.setRole(user.getRole().name());
         response.setExpiresIn(jwtUtil.extractExpiration(token).getTime() - System.currentTimeMillis());
+
+        // Send registration confirmation email
+        emailService.sendRegistrationConfirmation(user.getEmail(), deliveryPartner.getName(), "DELIVERY PARTNER");
 
         return response;
     }
