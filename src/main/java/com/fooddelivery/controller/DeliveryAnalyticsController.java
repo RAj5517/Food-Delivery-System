@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/delivery/analytics")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Delivery Analytics", description = "Delivery partner analytics and performance metrics (requires DELIVERY role)")
+@io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "bearerAuth")
 public class DeliveryAnalyticsController {
 
     @Autowired

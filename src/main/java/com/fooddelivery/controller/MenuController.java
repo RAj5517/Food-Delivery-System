@@ -12,6 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Menu Management", description = "Restaurant menu item management (requires RESTAURANT role)")
+@io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "bearerAuth")
 @RequestMapping("/api/restaurant/menu")
 public class MenuController {
 

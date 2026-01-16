@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/restaurant")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Restaurant Management", description = "Restaurant profile and settings management (requires RESTAURANT role)")
+@io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "bearerAuth")
 public class RestaurantController {
 
     @Autowired

@@ -5,6 +5,12 @@ import com.fooddelivery.dto.PlaceOrderRequest;
 import com.fooddelivery.model.Order;
 import com.fooddelivery.service.OrderService;
 import com.fooddelivery.util.SecurityUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/orders")
+@Tag(name = "Orders", description = "Order management endpoints (requires CUSTOMER authentication)")
+@SecurityRequirement(name = "bearerAuth")
 public class OrderController {
 
     @Autowired
@@ -26,6 +34,15 @@ public class OrderController {
     private SecurityUtil securityUtil;
 
     @PostMapping("/place")
+    @Operation(
+            summary = "Place a new order",
+            description = "Places an order from the current cart. Cart is cleared after successful order placement."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Order placed successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request or empty cart"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     public ResponseEntity<OrderResponse> placeOrder(
             Authentication authentication,
             @Valid @RequestBody PlaceOrderRequest request) {

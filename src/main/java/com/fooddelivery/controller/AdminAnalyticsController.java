@@ -18,6 +18,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/analytics")
 @PreAuthorize("hasRole('ADMIN')")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Admin Analytics", description = "Administrative analytics and reporting endpoints (requires ADMIN role)")
+@io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "bearerAuth")
 public class AdminAnalyticsController {
 
     @Autowired

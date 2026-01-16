@@ -4,6 +4,12 @@ import com.fooddelivery.dto.CartItemRequest;
 import com.fooddelivery.dto.CartResponse;
 import com.fooddelivery.service.CartService;
 import com.fooddelivery.util.SecurityUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/cart")
+@Tag(name = "Cart", description = "Shopping cart management endpoints (requires CUSTOMER authentication)")
+@SecurityRequirement(name = "bearerAuth")
 public class CartController {
 
     @Autowired
@@ -21,6 +29,11 @@ public class CartController {
     private SecurityUtil securityUtil;
 
     @GetMapping
+    @Operation(summary = "Get current cart", description = "Retrieves the current user's shopping cart with all items and total amount.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Cart retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     public ResponseEntity<CartResponse> getCart(Authentication authentication) {
         Long userId = securityUtil.getUserIdFromAuthentication(authentication);
         CartResponse response = cartService.getCart(userId);
@@ -28,6 +41,12 @@ public class CartController {
     }
 
     @PostMapping("/add")
+    @Operation(summary = "Add item to cart", description = "Adds a menu item to the shopping cart. If item already exists, quantity is updated.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Item added to cart successfully"),
+            @ApiResponse(responseCode = "404", description = "Menu item not found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     public ResponseEntity<CartResponse> addItemToCart(
             Authentication authentication,
             @Valid @RequestBody CartItemRequest request) {

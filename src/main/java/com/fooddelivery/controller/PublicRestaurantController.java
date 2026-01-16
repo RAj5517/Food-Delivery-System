@@ -2,6 +2,11 @@ package com.fooddelivery.controller;
 
 import com.fooddelivery.dto.RestaurantResponse;
 import com.fooddelivery.service.RestaurantService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,19 +20,35 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/restaurants")
+@Tag(name = "Public Restaurant", description = "Public endpoints for browsing restaurants (no authentication required)")
 public class PublicRestaurantController {
 
     @Autowired
     private RestaurantService restaurantService;
 
     @GetMapping
+    @Operation(
+            summary = "Get all restaurants with filters",
+            description = "Retrieves a paginated list of restaurants with optional filtering by cuisine, city, and minimum rating. Supports sorting and pagination."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Restaurants retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid pagination parameters")
+    })
     public ResponseEntity<Page<RestaurantResponse>> getAllRestaurants(
+            @Parameter(description = "Filter by cuisine type (e.g., Italian, Chinese)")
             @RequestParam(required = false) String cuisine,
+            @Parameter(description = "Filter by city name")
             @RequestParam(required = false) String city,
+            @Parameter(description = "Minimum rating (e.g., 4.0)")
             @RequestParam(required = false) BigDecimal minRating,
+            @Parameter(description = "Page number (0-indexed)", example = "0")
             @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10")
             @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Sort field (id, name, rating)", example = "rating")
             @RequestParam(defaultValue = "id") String sortBy,
+            @Parameter(description = "Sort direction (asc, desc)", example = "desc")
             @RequestParam(defaultValue = "asc") String sortDir) {
         
         Sort sort = sortDir.equalsIgnoreCase("desc") 
@@ -41,7 +62,17 @@ public class PublicRestaurantController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RestaurantResponse> getRestaurantById(@PathVariable Long id) {
+    @Operation(
+            summary = "Get restaurant by ID",
+            description = "Retrieves detailed information about a specific restaurant including menu items and ratings."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Restaurant found"),
+            @ApiResponse(responseCode = "404", description = "Restaurant not found")
+    })
+    public ResponseEntity<RestaurantResponse> getRestaurantById(
+            @Parameter(description = "Restaurant ID", required = true, example = "1")
+            @PathVariable Long id) {
         RestaurantResponse restaurant = restaurantService.getRestaurantById(id);
         return ResponseEntity.ok(restaurant);
     }

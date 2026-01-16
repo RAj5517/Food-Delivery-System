@@ -17,6 +17,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/restaurant/analytics")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Restaurant Analytics", description = "Restaurant analytics and insights endpoints (requires RESTAURANT role)")
+@io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "bearerAuth")
 public class RestaurantAnalyticsController {
 
     @Autowired
