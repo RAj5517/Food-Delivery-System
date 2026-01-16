@@ -35,6 +35,9 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
            nativeQuery = true)
     Page<Restaurant> findByCuisineAndCity(@Param("cuisine") String cuisine, @Param("city") String city, Pageable pageable);
     
+    // Admin queries
+    Page<Restaurant> findByIsApproved(Boolean isApproved, Pageable pageable);
+    
     // Find nearby restaurants using Haversine formula (distance in km)
     @Query(value = "SELECT r.*, " +
             "(6371 * acos(cos(radians(:lat)) * cos(radians(r.lat)) * " +
