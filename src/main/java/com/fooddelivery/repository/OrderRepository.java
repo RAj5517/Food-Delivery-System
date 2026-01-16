@@ -76,5 +76,23 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     
     // Count orders by customer
     Long countByCustomerId(Long customerId);
+    
+    // Find orders by delivery partner and status
+    List<Order> findByDeliveryPartnerIdAndStatus(Long deliveryPartnerId, Order.OrderStatus status);
+    
+    // Find orders by delivery partner, status, and date range
+    @Query("SELECT o FROM Order o WHERE o.deliveryPartner.id = :deliveryPartnerId AND o.status = :status AND o.orderDate BETWEEN :startDate AND :endDate")
+    List<Order> findByDeliveryPartnerIdAndStatusAndOrderDateBetween(
+            @Param("deliveryPartnerId") Long deliveryPartnerId,
+            @Param("status") Order.OrderStatus status,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
+    
+    // Find orders by delivery partner, status, and after start date
+    @Query("SELECT o FROM Order o WHERE o.deliveryPartner.id = :deliveryPartnerId AND o.status = :status AND o.orderDate >= :startDate")
+    List<Order> findByDeliveryPartnerIdAndStatusAndOrderDateAfter(
+            @Param("deliveryPartnerId") Long deliveryPartnerId,
+            @Param("status") Order.OrderStatus status,
+            @Param("startDate") LocalDateTime startDate);
 }
 
